@@ -11,15 +11,33 @@ server.listen(port, () => {
 });
 
 app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/index.html");
+  res.sendFile(__dirname + "/public/index.html");
 });
 
-io.on("connection", (socket) => {
-  socket.broadcast.emit('chat message','Hi there!')
-  socket.on("chat message", (msg) => {
-    io.emit("chat message", msg);
+app.get("/javascript", (req, res) => {
+  res.sendFile(__dirname + "/public/javascript.html");
+});
+
+app.get("/react", (req, res) => {
+  res.sendFile(__dirname + "/public/react.html");
+});
+
+app.get("/nodejs", (req, res) => {
+  res.sendFile(__dirname + "/public/nodejs.html");
+});
+
+const tech = io.of('/tech')
+
+tech.on("connection", (socket) => {
+  socket.on('join', (data)=>{
+    socket.join(data.room)
+    tech.in(data.room).emit('chat message',`New user joined ${data.room} room!`)
+  })
+  socket.on("chat message", (data) => {
+    tech.in(data.room).emit("chat message", data.msg);
   });
+
   socket.on('disconnect', ()=>{
-    io.emit('chat message', 'Bye everybody!')
+    tech.emit('chat message', 'User disconnected!')
   })
 });
