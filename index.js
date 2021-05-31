@@ -15,7 +15,11 @@ app.get("/", (req, res) => {
 });
 
 io.on("connection", (socket) => {
+  socket.broadcast.emit('chat message','Hi there!')
   socket.on("chat message", (msg) => {
     io.emit("chat message", msg);
   });
+  socket.on('disconnect', ()=>{
+    io.emit('chat message', 'Bye everybody!')
+  })
 });
